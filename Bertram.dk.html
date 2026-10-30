@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bertram.dk</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{--bg:#eef1f8;--surface:#fff;--ink:#1e2347;--muted:#6a7094;--line:#d9deee;--accent:#e0359a;--accent-ink:#fff;--chip:#c9f26b;--chip-ink:#1e2347;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14172e;--surface:#1f2342;--ink:#eef0ff;--muted:#9aa0c8;--line:#303660;--accent:#ff5cb8;--accent-ink:#14172e}}
+:root[data-theme="dark"]{--bg:#14172e;--surface:#1f2342;--ink:#eef0ff;--muted:#9aa0c8;--line:#303660;--accent:#ff5cb8;--accent-ink:#14172e}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.45}
+main{max-width:920px;margin:0 auto;padding:28px 18px 60px}
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:clamp(2.6rem,10vw,4.6rem);line-height:.95;margin:0;font-weight:800;letter-spacing:-.03em}
+.count{background:var(--chip);color:var(--chip-ink);font-weight:800;border-radius:999px;padding:8px 16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.tab{font:inherit;font-weight:600;border:2px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:2px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.card.liked{border-color:var(--accent)}
+.card a{color:var(--ink);font-weight:800;font-size:1.15rem;text-decoration:none;overflow-wrap:anywhere}
+.card a:hover{text-decoration:underline}
+.meta{color:var(--muted);font-size:.9rem;margin:0;overflow-wrap:anywhere}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto}
+.like{font:inherit;font-weight:800;border:2px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:6px 14px;cursor:pointer}
+.like[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.link-btn{font:inherit;border:0;background:none;color:var(--muted);cursor:pointer;text-decoration:underline;padding:4px}
+.card a.buy{display:block;text-align:center;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 14px;font-size:1rem;text-decoration:none}
+.card a.buy.free{background:var(--chip);color:var(--chip-ink)}
+.panel{margin-top:28px;background:var(--surface);border:2px dashed var(--line);border-radius:18px;padding:18px}
+.panel h2{margin:0 0 6px;font-size:1.2rem}
+.panel p{margin:0 0 12px;color:var(--muted)}
+.fields{display:flex;gap:8px;flex-wrap:wrap}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+input{flex:1 1 180px}
+.go{font:inherit;font-weight:800;background:var(--ink);color:var(--bg);border:0;border-radius:12px;padding:10px 18px;cursor:pointer}
+.ok{background:var(--chip);color:var(--chip-ink)}
+.pending{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}
+.pending b{overflow-wrap:anywhere}
+.msg{margin-top:10px;font-weight:600}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 10px}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Bertram.dk</h1>
+    <div class="count" id="count">0 links</div>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="grid"></div>
+  <div id="notice"></div>
+  <section class="panel" id="ownerPanel" hidden>
+    <h2>Læg et link på siden</h2>
+    <p>Kun dig kan lægge links direkte ind. De kommer med det samme. Skriv en pris, så får linket en Køb-knap. Skriv 0, så er det gratis. Lad feltet stå tomt for et helt almindeligt link.</p>
+    <div class="fields">
+      <input id="oTitle" type="text" maxlength="60" placeholder="Titel, fx Elden Ring" aria-label="Titel">
+      <input id="oUrl" type="text" maxlength="300" placeholder="Link, fx https://…" aria-label="Link">
+      <select id="oKind" aria-label="Kategori"><option>Spil</option><option>Tøj</option><option>Andet</option></select>
+      <input id="oPrice" type="number" min="0" step="1" placeholder="Pris i kr (0 = gratis)" aria-label="Pris i kroner">
+      <button class="go" id="oAdd">Læg ind</button>
+    </div>
+    <div class="msg" id="oMsg"></div>
+  </section>
+  <section class="panel" id="pendingPanel" hidden>
+    <h2>Links der venter på dig</h2>
+    <p>Andre kan foreslå links. De vises først, når du godkender dem.</p>
+    <div id="pendingList"></div>
+  </section>
+  <section class="panel" id="guestPanel" hidden>
+    <h2>Foreslå et link</h2>
+    <p>Dit forslag bliver først vist på siden, når Bertram har godkendt det.</p>
+    <div class="fields">
+      <input id="gTitle" type="text" maxlength="60" placeholder="Titel" aria-label="Titel">
+      <input id="gUrl" type="text" maxlength="300" placeholder="Link, fx https://…" aria-label="Link">
+      <select id="gKind" aria-label="Kategori"><option>Spil</option><option>Tøj</option><option>Andet</option></select>
+      <button class="go" id="gAdd">Send til godkendelse</button>
+    </div>
+    <div class="msg" id="gMsg"></div>
+  </section>
+</main>
+<script>
+(function(){
+var links=[],likeDocs={},pend=[],tab='Alle',db=null,uid=null,isOwner=false;
+var $=function(id){return document.getElementById(id);};
+function h(tag,props,kids){var e=document.createElement(tag);props=props||{};
+  for(var k in props){if(k==='text')e.textContent=props[k];else if(k==='class')e.className=props[k];else if(k.indexOf('on')===0)e.addEventListener(k.slice(2),props[k]);else e.setAttribute(k,props[k]);}
+  (kids||[]).forEach(function(c){e.appendChild(c);});return e;}
+function cleanUrl(v){v=(v||'').trim();if(!v)return null;if(!/^https?:\/\//i.test(v))v='https://'+v;
+  try{var u=new URL(v);if(u.protocol!=='http:'&&u.protocol!=='https:')return null;return u.href;}catch(e){return null;}}
+function host(u){try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return u;}}
+function likeCount(id){var n=0;for(var k in likeDocs){if((likeDocs[k]||[]).indexOf(id)>-1)n++;}return n;}
+function mine(){return likeDocs[uid]||[];}
+
+function render(){
+  $('count').textContent=links.length+(links.length===1?' link':' links');
+  var tabs=$('tabs');tabs.textContent='';
+  ['Alle','Spil','Tøj','Andet','Gratis','Mine likes'].forEach(function(t){
+    tabs.appendChild(h('button',{class:'tab','aria-pressed':String(t===tab),text:t,onclick:function(){tab=t;render();}}));});
+  var g=$('grid');g.textContent='';
+  var items=links.filter(function(l){return tab==='Alle'||(tab==='Mine likes'?mine().indexOf(l.id)>-1:(tab==='Gratis'?l.price===0:l.kind===tab));});
+  if(!items.length){g.appendChild(h('div',{class:'empty',text:links.length?'Ingen links her endnu.':(isOwner?'Siden er tom. Læg dit første link ind nedenfor.':'Der er ingen links endnu. Kig forbi igen snart.')}));}
+  items.forEach(function(l){
+    var on=mine().indexOf(l.id)>-1,n=likeCount(l.id);
+    var buy=l.price===null?document.createTextNode(''):h('a',{class:'buy'+(l.price===0?' free':''),href:l.url,target:'_blank',rel:'noopener noreferrer',text:l.price===0?'Hent gratis':'Køb · '+l.price+' kr'});
+    var row=h('div',{class:'row'},[
+      h('button',{class:'like','aria-pressed':String(on),text:(on?'♥ Liket':'♡ Like')+' · '+n,onclick:function(){toggle(l.id);}})]);
+    if(isOwner)row.appendChild(h('button',{class:'link-btn',text:'Fjern',onclick:function(){db.doc('links/'+l.id).delete();}}));
+    g.appendChild(h('article',{class:'card'+(on?' liked':'')},[
+      h('a',{href:l.url,target:'_blank',rel:'noopener noreferrer',text:l.title}),
+      h('p',{class:'meta',text:l.kind+' · '+host(l.url)+(l.price===0?' · Gratis':'')}),buy,row]));
+  });
+  var pl=$('pendingList');pl.textContent='';
+  if(!pend.length)pl.appendChild(h('p',{text:'Ingen forslag lige nu.'}));
+  pend.forEach(function(p){
+    pl.appendChild(h('div',{class:'pending'},[
+      h('div',{},[h('b',{text:p.title}),h('div',{class:'meta',text:p.kind+' · '+p.url})]),
+      h('div',{},[
+        h('button',{class:'go ok',text:'Godkend',onclick:function(){approve(p);}}),document.createTextNode(' '),
+        h('button',{class:'link-btn',text:'Afvis',onclick:function(){reject(p);}})])]));
+  });
+}
+function toggle(id){
+  if(!db||!uid){return;}
+  var a=mine().slice(),i=a.indexOf(id);if(i>-1)a.splice(i,1);else a.push(id);
+  likeDocs[uid]=a;render();
+  db.doc('likes/'+uid).set({ids:a}).catch(function(){});
+}
+function addOwner(){
+  var t=$('oTitle').value.trim(),u=cleanUrl($('oUrl').value);
+  if(!t||!u){$('oMsg').textContent='Skriv en titel og et gyldigt link.';return;}
+  var pv=$('oPrice').value.trim(),doc={title:t,url:u,kind:$('oKind').value,ts:Date.now()};
+  if(pv!==''&&!isNaN(Number(pv))&&Number(pv)>=0)doc.price=Math.round(Number(pv));
+  db.collection('links').add(doc).then(function(){
+    $('oTitle').value='';$('oUrl').value='';$('oPrice').value='';$('oMsg').textContent='Linket er lagt ind.';}).catch(function(){$('oMsg').textContent='Kunne ikke gemme. Prøv igen.';});
+}
+function suggest(){
+  var t=$('gTitle').value.trim(),u=cleanUrl($('gUrl').value);
+  if(!t||!u){$('gMsg').textContent='Skriv en titel og et gyldigt link.';return;}
+  var ref=db.doc('suggestions/'+uid);
+  ref.get().then(function(s){
+    var items=(s.exists&&s.data().items)||[];
+    items=items.concat([{id:'s'+Date.now(),title:t,url:u,kind:$('gKind').value}]);
+    return ref.set({items:items});
+  }).then(function(){$('gTitle').value='';$('gUrl').value='';$('gMsg').textContent='Tak! Dit forslag venter på godkendelse.';})
+    .catch(function(){$('gMsg').textContent='Du har ikke ret til at foreslå links her endnu.';});
+}
+function dropSuggestion(p){
+  var ref=db.doc('suggestions/'+p.uid);
+  return ref.get().then(function(s){var items=((s.exists&&s.data().items)||[]).filter(function(x){return x.id!==p.id;});return ref.set({items:items});});
+}
+function approve(p){db.collection('links').add({title:p.title,url:p.url,kind:p.kind,ts:Date.now()}).then(function(){return dropSuggestion(p);});}
+function reject(p){dropSuggestion(p);}
+
+render();
+(async function(){
+  var user=null;
+  try{user=await claude.use('user');}catch(e){}
+  try{db=await claude.use('db');}catch(e){}
+  if(!db){$('notice').appendChild(h('div',{class:'panel',text:'Log ind på Claude for at se og like links.'}));return;}
+  try{isOwner=user?await user.isOwner():false;uid=user?await user.id():null;}catch(e){}
+  if(isOwner){$('ownerPanel').hidden=false;$('pendingPanel').hidden=false;}
+  else if(uid){$('guestPanel').hidden=false;}
+  $('oAdd').addEventListener('click',addOwner);
+  $('gAdd').addEventListener('click',suggest);
+  db.collection('links').orderBy('ts','desc').onSnapshot(function(s){
+    links=s.docs.map(function(d){var x=d.data();return{id:d.id,title:String(x.title||''),url:String(x.url||''),kind:String(x.kind||'Andet'),price:(typeof x.price==='number'&&x.price>=0)?x.price:null};})
+      .filter(function(l){return cleanUrl(l.url);});render();},function(){});
+  db.collection('likes').onSnapshot(function(s){likeDocs={};s.docs.forEach(function(d){likeDocs[d.id]=(d.data().ids)||[];});render();},function(){});
+  if(isOwner)db.collection('suggestions').onSnapshot(function(s){
+    pend=[];s.docs.forEach(function(d){((d.data().items)||[]).forEach(function(it){pend.push({uid:d.id,id:it.id,title:String(it.title),url:String(it.url),kind:String(it.kind)});});});render();},function(){});
+})();
+})();
+</script>
+</body>
+</html>
